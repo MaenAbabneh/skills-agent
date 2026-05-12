@@ -26,9 +26,8 @@ const HomeHeader = ({
 						Skilled Library
 					</h1>
 					<p className="mt-3 max-w-2xl text-sm leading-6 text-gray-600 md:text-base dark:text-gray-400">
-						A curated library for discovering ready-to-use skills and tools
-						that help developers build interfaces, services, and analytics
-						faster.
+						A curated library for discovering ready-to-use skills and tools that
+						help developers build interfaces, services, and analytics faster.
 					</p>
 				</div>
 

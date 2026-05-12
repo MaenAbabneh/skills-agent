@@ -1,15 +1,15 @@
-import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-	Copy,
-	Check,
 	ArrowUp,
+	Check,
+	Copy,
+	Heart,
 	MessageSquare,
 	Terminal,
-	Heart,
 } from "lucide-react";
-import { useUIStore } from "@/store/useUIStore";
+import { useState } from "react";
 import { generateSlug } from "#/lib/utils";
+import { useUIStore } from "@/store/useUIStore";
 
 // Data shape based on the database structure.
 export interface SkillType {
@@ -69,7 +69,7 @@ const SkillCard = (skill: SkillType) => {
 		year: "numeric",
 	});
 
-  const skillSlug = generateSlug(skill.title);
+	const skillSlug = generateSlug(skill.title);
 
 	return (
 		<article
@@ -87,8 +87,8 @@ const SkillCard = (skill: SkillType) => {
 		>
 			{/* Hidden overlay link for TanStack Router navigation. */}
 			<Link
-				to="/skills/$skillSlug"
-				params={{ skillSlug: skillSlug }}
+				to={"/skills/$skillSlug" as any}
+				params={{ skillSlug: skillSlug } as any}
 				className="absolute inset-0 z-10"
 				aria-label={`View details for ${skill.title}`}
 			/>

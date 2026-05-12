@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export interface SearchBarProps {
 	value: string;
@@ -21,7 +21,7 @@ const SearchBar = ({ value, onChange }: SearchBarProps) => {
 			clearTimeout(handler);
 		};
 	}, [localValue, onChange]);
-	
+
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if ((event.metaKey || event.ctrlKey) && event.key === "k") {
@@ -31,11 +31,11 @@ const SearchBar = ({ value, onChange }: SearchBarProps) => {
 				);
 				input?.focus();
 			}
-		}
+		};
 		window.addEventListener("keydown", handleKeyDown);
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
-		}
+		};
 	}, []);
 
 	return (

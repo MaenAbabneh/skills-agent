@@ -10,53 +10,159 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as SkillsSkillSlugIndexRouteImport } from './routes/skills/$skillSlug/index'
-import { Route as SkillsSkillSlugEditeRouteImport } from './routes/skills/$skillSlug/edite'
+import { Route as dashboardAdminRouteRouteImport } from './routes/(dashboard)/admin/route'
+import { Route as dashboardAdminIndexRouteImport } from './routes/(dashboard)/admin/index'
+import { Route as ApiCronDiscoveryRouteImport } from './routes/api/cron/discovery'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as dashboardAdminUsersRouteImport } from './routes/(dashboard)/admin/users'
+import { Route as dashboardAdminSyncLogsRouteImport } from './routes/(dashboard)/admin/sync-logs'
+import { Route as dashboardAdminSubmissionsRouteImport } from './routes/(dashboard)/admin/submissions'
+import { Route as dashboardAdminSettingsRouteImport } from './routes/(dashboard)/admin/settings'
+import { Route as dashboardAdminReposRouteImport } from './routes/(dashboard)/admin/repos'
+import { Route as dashboardAdminDiscoveryRouteImport } from './routes/(dashboard)/admin/discovery'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SkillsSkillSlugIndexRoute = SkillsSkillSlugIndexRouteImport.update({
-  id: '/skills/$skillSlug/',
-  path: '/skills/$skillSlug/',
+const dashboardAdminRouteRoute = dashboardAdminRouteRouteImport.update({
+  id: '/(dashboard)/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SkillsSkillSlugEditeRoute = SkillsSkillSlugEditeRouteImport.update({
-  id: '/skills/$skillSlug/edite',
-  path: '/skills/$skillSlug/edite',
+const dashboardAdminIndexRoute = dashboardAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => dashboardAdminRouteRoute,
+} as any)
+const ApiCronDiscoveryRoute = ApiCronDiscoveryRouteImport.update({
+  id: '/api/cron/discovery',
+  path: '/api/cron/discovery',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const dashboardAdminUsersRoute = dashboardAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => dashboardAdminRouteRoute,
+} as any)
+const dashboardAdminSyncLogsRoute = dashboardAdminSyncLogsRouteImport.update({
+  id: '/sync-logs',
+  path: '/sync-logs',
+  getParentRoute: () => dashboardAdminRouteRoute,
+} as any)
+const dashboardAdminSubmissionsRoute =
+  dashboardAdminSubmissionsRouteImport.update({
+    id: '/submissions',
+    path: '/submissions',
+    getParentRoute: () => dashboardAdminRouteRoute,
+  } as any)
+const dashboardAdminSettingsRoute = dashboardAdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => dashboardAdminRouteRoute,
+} as any)
+const dashboardAdminReposRoute = dashboardAdminReposRouteImport.update({
+  id: '/repos',
+  path: '/repos',
+  getParentRoute: () => dashboardAdminRouteRoute,
+} as any)
+const dashboardAdminDiscoveryRoute = dashboardAdminDiscoveryRouteImport.update({
+  id: '/discovery',
+  path: '/discovery',
+  getParentRoute: () => dashboardAdminRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/skills/$skillSlug/edite': typeof SkillsSkillSlugEditeRoute
-  '/skills/$skillSlug/': typeof SkillsSkillSlugIndexRoute
+  '/admin': typeof dashboardAdminRouteRouteWithChildren
+  '/admin/discovery': typeof dashboardAdminDiscoveryRoute
+  '/admin/repos': typeof dashboardAdminReposRoute
+  '/admin/settings': typeof dashboardAdminSettingsRoute
+  '/admin/submissions': typeof dashboardAdminSubmissionsRoute
+  '/admin/sync-logs': typeof dashboardAdminSyncLogsRoute
+  '/admin/users': typeof dashboardAdminUsersRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/discovery': typeof ApiCronDiscoveryRoute
+  '/admin/': typeof dashboardAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/skills/$skillSlug/edite': typeof SkillsSkillSlugEditeRoute
-  '/skills/$skillSlug': typeof SkillsSkillSlugIndexRoute
+  '/admin/discovery': typeof dashboardAdminDiscoveryRoute
+  '/admin/repos': typeof dashboardAdminReposRoute
+  '/admin/settings': typeof dashboardAdminSettingsRoute
+  '/admin/submissions': typeof dashboardAdminSubmissionsRoute
+  '/admin/sync-logs': typeof dashboardAdminSyncLogsRoute
+  '/admin/users': typeof dashboardAdminUsersRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/discovery': typeof ApiCronDiscoveryRoute
+  '/admin': typeof dashboardAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/skills/$skillSlug/edite': typeof SkillsSkillSlugEditeRoute
-  '/skills/$skillSlug/': typeof SkillsSkillSlugIndexRoute
+  '/(dashboard)/admin': typeof dashboardAdminRouteRouteWithChildren
+  '/(dashboard)/admin/discovery': typeof dashboardAdminDiscoveryRoute
+  '/(dashboard)/admin/repos': typeof dashboardAdminReposRoute
+  '/(dashboard)/admin/settings': typeof dashboardAdminSettingsRoute
+  '/(dashboard)/admin/submissions': typeof dashboardAdminSubmissionsRoute
+  '/(dashboard)/admin/sync-logs': typeof dashboardAdminSyncLogsRoute
+  '/(dashboard)/admin/users': typeof dashboardAdminUsersRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/discovery': typeof ApiCronDiscoveryRoute
+  '/(dashboard)/admin/': typeof dashboardAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/skills/$skillSlug/edite' | '/skills/$skillSlug/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/admin/discovery'
+    | '/admin/repos'
+    | '/admin/settings'
+    | '/admin/submissions'
+    | '/admin/sync-logs'
+    | '/admin/users'
+    | '/api/auth/$'
+    | '/api/cron/discovery'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/skills/$skillSlug/edite' | '/skills/$skillSlug'
-  id: '__root__' | '/' | '/skills/$skillSlug/edite' | '/skills/$skillSlug/'
+  to:
+    | '/'
+    | '/admin/discovery'
+    | '/admin/repos'
+    | '/admin/settings'
+    | '/admin/submissions'
+    | '/admin/sync-logs'
+    | '/admin/users'
+    | '/api/auth/$'
+    | '/api/cron/discovery'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/(dashboard)/admin'
+    | '/(dashboard)/admin/discovery'
+    | '/(dashboard)/admin/repos'
+    | '/(dashboard)/admin/settings'
+    | '/(dashboard)/admin/submissions'
+    | '/(dashboard)/admin/sync-logs'
+    | '/(dashboard)/admin/users'
+    | '/api/auth/$'
+    | '/api/cron/discovery'
+    | '/(dashboard)/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SkillsSkillSlugEditeRoute: typeof SkillsSkillSlugEditeRoute
-  SkillsSkillSlugIndexRoute: typeof SkillsSkillSlugIndexRoute
+  dashboardAdminRouteRoute: typeof dashboardAdminRouteRouteWithChildren
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiCronDiscoveryRoute: typeof ApiCronDiscoveryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,27 +174,107 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/skills/$skillSlug/': {
-      id: '/skills/$skillSlug/'
-      path: '/skills/$skillSlug'
-      fullPath: '/skills/$skillSlug/'
-      preLoaderRoute: typeof SkillsSkillSlugIndexRouteImport
+    '/(dashboard)/admin': {
+      id: '/(dashboard)/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof dashboardAdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/skills/$skillSlug/edite': {
-      id: '/skills/$skillSlug/edite'
-      path: '/skills/$skillSlug/edite'
-      fullPath: '/skills/$skillSlug/edite'
-      preLoaderRoute: typeof SkillsSkillSlugEditeRouteImport
+    '/(dashboard)/admin/': {
+      id: '/(dashboard)/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof dashboardAdminIndexRouteImport
+      parentRoute: typeof dashboardAdminRouteRoute
+    }
+    '/api/cron/discovery': {
+      id: '/api/cron/discovery'
+      path: '/api/cron/discovery'
+      fullPath: '/api/cron/discovery'
+      preLoaderRoute: typeof ApiCronDiscoveryRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(dashboard)/admin/users': {
+      id: '/(dashboard)/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof dashboardAdminUsersRouteImport
+      parentRoute: typeof dashboardAdminRouteRoute
+    }
+    '/(dashboard)/admin/sync-logs': {
+      id: '/(dashboard)/admin/sync-logs'
+      path: '/sync-logs'
+      fullPath: '/admin/sync-logs'
+      preLoaderRoute: typeof dashboardAdminSyncLogsRouteImport
+      parentRoute: typeof dashboardAdminRouteRoute
+    }
+    '/(dashboard)/admin/submissions': {
+      id: '/(dashboard)/admin/submissions'
+      path: '/submissions'
+      fullPath: '/admin/submissions'
+      preLoaderRoute: typeof dashboardAdminSubmissionsRouteImport
+      parentRoute: typeof dashboardAdminRouteRoute
+    }
+    '/(dashboard)/admin/settings': {
+      id: '/(dashboard)/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof dashboardAdminSettingsRouteImport
+      parentRoute: typeof dashboardAdminRouteRoute
+    }
+    '/(dashboard)/admin/repos': {
+      id: '/(dashboard)/admin/repos'
+      path: '/repos'
+      fullPath: '/admin/repos'
+      preLoaderRoute: typeof dashboardAdminReposRouteImport
+      parentRoute: typeof dashboardAdminRouteRoute
+    }
+    '/(dashboard)/admin/discovery': {
+      id: '/(dashboard)/admin/discovery'
+      path: '/discovery'
+      fullPath: '/admin/discovery'
+      preLoaderRoute: typeof dashboardAdminDiscoveryRouteImport
+      parentRoute: typeof dashboardAdminRouteRoute
     }
   }
 }
 
+interface dashboardAdminRouteRouteChildren {
+  dashboardAdminDiscoveryRoute: typeof dashboardAdminDiscoveryRoute
+  dashboardAdminReposRoute: typeof dashboardAdminReposRoute
+  dashboardAdminSettingsRoute: typeof dashboardAdminSettingsRoute
+  dashboardAdminSubmissionsRoute: typeof dashboardAdminSubmissionsRoute
+  dashboardAdminSyncLogsRoute: typeof dashboardAdminSyncLogsRoute
+  dashboardAdminUsersRoute: typeof dashboardAdminUsersRoute
+  dashboardAdminIndexRoute: typeof dashboardAdminIndexRoute
+}
+
+const dashboardAdminRouteRouteChildren: dashboardAdminRouteRouteChildren = {
+  dashboardAdminDiscoveryRoute: dashboardAdminDiscoveryRoute,
+  dashboardAdminReposRoute: dashboardAdminReposRoute,
+  dashboardAdminSettingsRoute: dashboardAdminSettingsRoute,
+  dashboardAdminSubmissionsRoute: dashboardAdminSubmissionsRoute,
+  dashboardAdminSyncLogsRoute: dashboardAdminSyncLogsRoute,
+  dashboardAdminUsersRoute: dashboardAdminUsersRoute,
+  dashboardAdminIndexRoute: dashboardAdminIndexRoute,
+}
+
+const dashboardAdminRouteRouteWithChildren =
+  dashboardAdminRouteRoute._addFileChildren(dashboardAdminRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SkillsSkillSlugEditeRoute: SkillsSkillSlugEditeRoute,
-  SkillsSkillSlugIndexRoute: SkillsSkillSlugIndexRoute,
+  dashboardAdminRouteRoute: dashboardAdminRouteRouteWithChildren,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiCronDiscoveryRoute: ApiCronDiscoveryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
