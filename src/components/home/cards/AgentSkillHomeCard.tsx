@@ -1,22 +1,32 @@
 import { Heart, Star } from "lucide-react";
 import { formatDate, formatNumber } from "@/lib/format";
 import { markdownToPlainTextPreview } from "@/lib/markdown-preview";
-import type { AgentSkillHomeItem } from "@/server/functions/public-home";
 import { CopyButton } from "../ui/CopyButton";
 import { TerminalDots } from "../ui/TerminalDots";
+
+export type AgentSkillCardItem = {
+	id: string;
+	skillName: string;
+	fileUrl: string;
+	description: string | null;
+	repoFullName: string;
+	repoStars: number;
+	repoUpdatedAt: string;
+	installCommand: string;
+};
 
 function getSkillFileTitle(skillName: string) {
 	return /\.[a-z0-9]+$/i.test(skillName) ? skillName : `${skillName}.md`;
 }
 
-function getCardInstallCommand(item: AgentSkillHomeItem) {
+function getCardInstallCommand(item: AgentSkillCardItem) {
 	if ("installCommand" in item && typeof item.installCommand === "string") {
 		return item.installCommand;
 	}
 	return `npx skills add ${item.repoFullName}`;
 }
 
-export function AgentSkillHomeCard({ item }: { item: AgentSkillHomeItem }) {
+export function AgentSkillHomeCard({ item }: { item: AgentSkillCardItem }) {
 	const installCommand = getCardInstallCommand(item);
 	const description =
 		markdownToPlainTextPreview(item.description ?? "", 180) ||

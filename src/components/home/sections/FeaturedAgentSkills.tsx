@@ -23,8 +23,7 @@ export function FeaturedAgentSkills({
 	const [sort, setSort] = useState<"recent" | "stars">("recent");
 	const sectionRef = useRef<HTMLDivElement>(null);
 	const searchRef = useRef<HTMLDivElement>(null);
-	// TODO: link to /skills when the public skills page is implemented.
-	const loadMoreHref = "#featured-agent-skills";
+	const loadMoreHref = "/skills";
 
 	useStickySearchEnhancement(sectionRef, searchRef);
 
@@ -80,7 +79,11 @@ export function FeaturedAgentSkills({
 						onFilterChange={setFilter}
 						sortLabel="Sort by"
 						sortValue={sort}
-						onSortChange={setSort}
+						onSortChange={(value) => {
+							if (value !== "name") {
+								setSort(value);
+							}
+						}}
 					/>
 				</HomeSectionFrame>
 			</div>

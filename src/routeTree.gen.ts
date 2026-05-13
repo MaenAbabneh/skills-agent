@@ -9,7 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SkillsRouteImport } from './routes/skills'
+import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as authSignOutRouteImport } from './routes/(auth)/sign-out'
+import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as dashboardAdminRouteRouteImport } from './routes/(dashboard)/admin/route'
 import { Route as dashboardAdminIndexRouteImport } from './routes/(dashboard)/admin/index'
 import { Route as ApiCronDiscoveryRouteImport } from './routes/api/cron/discovery'
@@ -21,9 +25,29 @@ import { Route as dashboardAdminSettingsRouteImport } from './routes/(dashboard)
 import { Route as dashboardAdminReposRouteImport } from './routes/(dashboard)/admin/repos'
 import { Route as dashboardAdminDiscoveryRouteImport } from './routes/(dashboard)/admin/discovery'
 
+const SkillsRoute = SkillsRouteImport.update({
+  id: '/skills',
+  path: '/skills',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authSignOutRoute = authSignOutRouteImport.update({
+  id: '/(auth)/sign-out',
+  path: '/sign-out',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authSignInRoute = authSignInRouteImport.update({
+  id: '/(auth)/sign-in',
+  path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
 const dashboardAdminRouteRoute = dashboardAdminRouteRouteImport.update({
@@ -80,7 +104,11 @@ const dashboardAdminDiscoveryRoute = dashboardAdminDiscoveryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesRoute
+  '/skills': typeof SkillsRoute
   '/admin': typeof dashboardAdminRouteRouteWithChildren
+  '/sign-in': typeof authSignInRoute
+  '/sign-out': typeof authSignOutRoute
   '/admin/discovery': typeof dashboardAdminDiscoveryRoute
   '/admin/repos': typeof dashboardAdminReposRoute
   '/admin/settings': typeof dashboardAdminSettingsRoute
@@ -93,6 +121,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesRoute
+  '/skills': typeof SkillsRoute
+  '/sign-in': typeof authSignInRoute
+  '/sign-out': typeof authSignOutRoute
   '/admin/discovery': typeof dashboardAdminDiscoveryRoute
   '/admin/repos': typeof dashboardAdminReposRoute
   '/admin/settings': typeof dashboardAdminSettingsRoute
@@ -106,7 +138,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesRoute
+  '/skills': typeof SkillsRoute
   '/(dashboard)/admin': typeof dashboardAdminRouteRouteWithChildren
+  '/(auth)/sign-in': typeof authSignInRoute
+  '/(auth)/sign-out': typeof authSignOutRoute
   '/(dashboard)/admin/discovery': typeof dashboardAdminDiscoveryRoute
   '/(dashboard)/admin/repos': typeof dashboardAdminReposRoute
   '/(dashboard)/admin/settings': typeof dashboardAdminSettingsRoute
@@ -121,7 +157,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/categories'
+    | '/skills'
     | '/admin'
+    | '/sign-in'
+    | '/sign-out'
     | '/admin/discovery'
     | '/admin/repos'
     | '/admin/settings'
@@ -134,6 +174,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/categories'
+    | '/skills'
+    | '/sign-in'
+    | '/sign-out'
     | '/admin/discovery'
     | '/admin/repos'
     | '/admin/settings'
@@ -146,7 +190,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/categories'
+    | '/skills'
     | '/(dashboard)/admin'
+    | '/(auth)/sign-in'
+    | '/(auth)/sign-out'
     | '/(dashboard)/admin/discovery'
     | '/(dashboard)/admin/repos'
     | '/(dashboard)/admin/settings'
@@ -160,18 +208,50 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategoriesRoute: typeof CategoriesRoute
+  SkillsRoute: typeof SkillsRoute
   dashboardAdminRouteRoute: typeof dashboardAdminRouteRouteWithChildren
+  authSignInRoute: typeof authSignInRoute
+  authSignOutRoute: typeof authSignOutRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCronDiscoveryRoute: typeof ApiCronDiscoveryRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/skills': {
+      id: '/skills'
+      path: '/skills'
+      fullPath: '/skills'
+      preLoaderRoute: typeof SkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/sign-out': {
+      id: '/(auth)/sign-out'
+      path: '/sign-out'
+      fullPath: '/sign-out'
+      preLoaderRoute: typeof authSignOutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/sign-in': {
+      id: '/(auth)/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof authSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(dashboard)/admin': {
@@ -272,7 +352,11 @@ const dashboardAdminRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategoriesRoute: CategoriesRoute,
+  SkillsRoute: SkillsRoute,
   dashboardAdminRouteRoute: dashboardAdminRouteRouteWithChildren,
+  authSignInRoute: authSignInRoute,
+  authSignOutRoute: authSignOutRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCronDiscoveryRoute: ApiCronDiscoveryRoute,
 }
