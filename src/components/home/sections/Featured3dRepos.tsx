@@ -75,7 +75,11 @@ export function Featured3dRepos({ items }: { items: RepoHomeItem[] }) {
 						onFilterChange={setFilter}
 						sortLabel="Sort by"
 						sortValue={sort}
-						onSortChange={setSort}
+						onSortChange={(value) => {
+							if (value !== "name") {
+								setSort(value);
+							}
+						}}
 					/>
 				</HomeSectionFrame>
 			</div>

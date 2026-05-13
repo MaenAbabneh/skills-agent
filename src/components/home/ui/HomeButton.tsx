@@ -1,6 +1,6 @@
-import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { ArrowRightIcon } from "./ArrowRightIcon";
 
 type HomeButtonVariant = "primary" | "outline" | "docs";
 
@@ -37,13 +37,18 @@ export function HomeButton({
 			target={external ? "_blank" : undefined}
 			rel={external ? "noreferrer" : undefined}
 			className={cn(
-				"inline-flex items-center gap-2 rounded-full border px-6 py-4 text-base font-semibold transition-all",
+				"group inline-flex items-center gap-2 rounded-full border px-6 py-4 text-base font-semibold transition-all",
 				variantClasses[variant],
 				className,
 			)}
 		>
 			{children}
-			<ArrowRight className={arrowClasses[variant]} size={16} />
+			<ArrowRightIcon
+				className={cn(
+					"h-4 w-4 transition-transform group-hover:translate-x-0.5",
+					arrowClasses[variant],
+				)}
+			/>
 		</a>
 	);
 }
