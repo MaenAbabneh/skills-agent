@@ -3,6 +3,47 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  /* Brand */
+  --color-marketplace-brown: #d99178;
+  --color-marketplace-brown-soft: #e8a68f;
+  --color-marketplace-brown-dark: #9f604d;
+
+  /* Backgrounds */
+  --color-marketplace-bg: #05070a;
+  --color-marketplace-bg-soft: #070b0e;
+  --color-marketplace-surface: #090d12;
+  --color-marketplace-surface-soft: #111318;
+
+  /* Borders */
+  --color-marketplace-border: #27272a;
+  --color-marketplace-border-soft: #18181b;
+
+  /* Text */
+  --color-marketplace-text: #f4f4f5;
+  --color-marketplace-muted: #a1a1aa;
+  --color-marketplace-dim: #71717a;
+
+  /* Terminal accents */
+  --color-terminal-green: #22c55e;
+  --color-terminal-green-soft: #10b981;
+  --color-terminal-orange: #fb923c;
+  --color-terminal-yellow: #facc15;
+  --color-terminal-blue: #60a5fa;
+  --color-terminal-purple: #a78bfa;
+  --color-terminal-pink: #e879f9;
+
+  /* Chart */
+  --color-chart-skills: #d99178;
+  --color-chart-repos: #34d399;
+  --color-chart-grid: #27272a;
+
+  /* Status */
+  --color-status-success: #22c55e;
+  --color-status-warning: #facc15;
+  --color-status-danger: #ef4444;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -61,4 +102,36 @@ body {
 .dark .menu-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #4b5563;
   background-clip: content-box;
+}
+
+.section-search-sticky {
+  transition:
+    box-shadow 180ms ease,
+    filter 180ms ease;
+  will-change: transform, opacity;
+}
+
+.section-search-sticky.is-active {
+  filter: saturate(1.04);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+}
+
+.section-search-sticky.is-active > * {
+  backdrop-filter: blur(14px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-reveal,
+  .home-card-reveal,
+  .section-search-sticky {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .section-search-sticky,
+  .section-search-sticky.is-active,
+  .section-search-sticky.is-active > * {
+    filter: none;
+    transition: none;
+  }
 }
