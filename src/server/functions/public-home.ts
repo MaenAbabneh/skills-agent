@@ -1,13 +1,26 @@
 import { createServerFn } from "@tanstack/react-start";
-import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
+import {
+	and,
+	count,
+	desc,
+	eq,
+	inArray,
+	isNull,
+	ne,
+	or,
+	sql,
+} from "drizzle-orm";
 
 import { db } from "@/server/db";
 import {
+	agentSkillCategories,
 	agentSkillFiles,
+	agentSkillSubcategories,
 	repoSections,
 	repositories,
 } from "@/server/db/schema";
 import { getPublicAgentSkillInstallCommand } from "./public-agent-skills.helpers";
+import { withSafePublicQuery } from "./public-query-safety";
 
 export type AgentSkillHomeItem = {
 	id: string;
@@ -99,215 +112,261 @@ type Featured3dRepoRow = {
 export const getPublicHomeData = createServerFn({
 	method: "GET",
 }).handler(async (): Promise<PublicHomeData> => {
-	// TODO before public launch:
-	// Restore public-safe filters:
-	// - agent_skill_files.status = "approved"
-	// - repo_sections.status = "approved"
-	const agentSkillHomeFilter = and(
-		eq(agentSkillFiles.section, "agent-skills"),
-		eq(agentSkillFiles.isAccepted, true),
-		sql`${agentSkillFiles.status} != 'hidden'`,
-	);
+	return withSafePublicQuery(
+		"getPublicHomeData",
+		async () => {
+			// TODO before public launch:
+			// Restore public-safe filters:
+			// - agent_skill_files.status = "approved"
+			// - repo_sections.status = "approved"
+			const agentSkillHomeFilter = and(
+				eq(agentSkillFiles.section, "agent-skills"),
+				eq(agentSkillFiles.isAccepted, true),
+				or(
+					isNull(agentSkillFiles.status),
+					ne(agentSkillFiles.status, "hidden"),
+				),
+			);
 
-	// TODO before public launch:
-	// Restore public-safe filters:
-	// - agent_skill_files.status = "approved"
-	// - repo_sections.status = "approved"
-	const repoHomeFilter = and(
-		eq(repoSections.section, "3d-motion"),
-		eq(repoSections.isAccepted, true),
-		sql`${repoSections.status} != 'hidden'`,
-	);
+			// TODO before public launch:
+			// Restore public-safe filters:
+			// - agent_skill_files.status = "approved"
+			// - repo_sections.status = "approved"
+			const repoHomeFilter = and(
+				eq(repoSections.section, "3d-motion"),
+				eq(repoSections.isAccepted, true),
+				or(isNull(repoSections.status), ne(repoSections.status, "hidden")),
+			);
 
-	const [
-		agentSkillCountRows,
-		repoCountRows,
-		agentSkillRepoRows,
-		repoSourceRows,
-		categoryStatsRows,
-		featuredAgentSkillRows,
-		featured3dRepoRows,
-		agentSkillCategoryRows,
-		agentSkillDatesRows,
-		repo3dDatesRows,
-	] = await Promise.all([
-		db
-			.select({ count: count() })
-			.from(agentSkillFiles)
-			.where(agentSkillHomeFilter),
+			const categoryLabelExpr = sql<string>`coalesce(${agentSkillSubcategories.name}, ${agentSkillCategories.name}, ${agentSkillFiles.category})`;
 
-		db.select({ count: count() }).from(repoSections).where(repoHomeFilter),
+			const [
+				agentSkillCountRows,
+				repoCountRows,
+				agentSkillRepoRows,
+				repoSourceRows,
+				categoryStatsRows,
+				featuredAgentSkillRows,
+				featured3dRepoRows,
+				agentSkillCategoryRows,
+				agentSkillDatesRows,
+				repo3dDatesRows,
+			] = await Promise.all([
+				db
+					.select({ count: count() })
+					.from(agentSkillFiles)
+					.where(agentSkillHomeFilter),
 
-		db
-			.select({ repoId: agentSkillFiles.repoId })
-			.from(agentSkillFiles)
-			.where(agentSkillHomeFilter),
+				db.select({ count: count() }).from(repoSections).where(repoHomeFilter),
 
-		db
-			.select({ repoId: repoSections.repoId })
-			.from(repoSections)
-			.where(repoHomeFilter),
+				db
+					.select({ repoId: agentSkillFiles.repoId })
+					.from(agentSkillFiles)
+					.where(agentSkillHomeFilter),
 
-		db
-			.select({
-				count: sql<number>`count(distinct ${agentSkillFiles.category})`,
-			})
-			.from(agentSkillFiles)
-			.where(agentSkillHomeFilter),
+				db
+					.select({ repoId: repoSections.repoId })
+					.from(repoSections)
+					.where(repoHomeFilter),
 
-		db
-			.select({
-				id: agentSkillFiles.id,
-				skillName: agentSkillFiles.skillName,
-				slug: agentSkillFiles.slug,
-				category: agentSkillFiles.category,
-				filePath: agentSkillFiles.filePath,
-				fileUrl: agentSkillFiles.fileUrl,
-				description: agentSkillFiles.description,
-				status: agentSkillFiles.status,
-				confidence: agentSkillFiles.confidence,
-				metadata: agentSkillFiles.metadata,
-				updatedAt: agentSkillFiles.updatedAt,
-				repoFullName: repositories.fullName,
-				repoUrl: repositories.url,
-				repoStars: repositories.stars,
-				repoForks: repositories.forks,
-				repoUpdatedAt: repositories.githubUpdatedAt,
-			})
-			.from(agentSkillFiles)
-			.innerJoin(repositories, eq(agentSkillFiles.repoId, repositories.id))
-			.where(agentSkillHomeFilter)
-			.orderBy(desc(repositories.stars), desc(agentSkillFiles.updatedAt))
-			.limit(6),
+				db
+					.select({
+						count: sql<number>`count(distinct ${categoryLabelExpr})`,
+					})
+					.from(agentSkillFiles)
+					.leftJoin(
+						agentSkillSubcategories,
+						eq(agentSkillFiles.subcategoryId, agentSkillSubcategories.id),
+					)
+					.leftJoin(
+						agentSkillCategories,
+						eq(agentSkillFiles.categoryId, agentSkillCategories.id),
+					)
+					.where(agentSkillHomeFilter),
 
-		db
-			.select({
-				repoSectionId: repoSections.id,
-				repoId: repositories.id,
-				fullName: repositories.fullName,
-				description: repositories.description,
-				url: repositories.url,
-				homepage: repositories.homepage,
-				stars: repositories.stars,
-				forks: repositories.forks,
-				language: repositories.language,
-				topics: repositories.topics,
-				pushedAt: repositories.pushedAt,
-			})
-			.from(repoSections)
-			.innerJoin(repositories, eq(repoSections.repoId, repositories.id))
-			.where(repoHomeFilter)
-			.orderBy(desc(repoSections.score), desc(repositories.stars))
-			.limit(6),
+				db
+					.select({
+						id: agentSkillFiles.id,
+						skillName: agentSkillFiles.skillName,
+						slug: agentSkillFiles.slug,
+						category: categoryLabelExpr,
+						filePath: agentSkillFiles.filePath,
+						fileUrl: agentSkillFiles.fileUrl,
+						description: agentSkillFiles.description,
+						status: agentSkillFiles.status,
+						confidence: agentSkillFiles.confidence,
+						metadata: agentSkillFiles.metadata,
+						updatedAt: agentSkillFiles.updatedAt,
+						repoFullName: repositories.fullName,
+						repoUrl: repositories.url,
+						repoStars: repositories.stars,
+						repoForks: repositories.forks,
+						repoUpdatedAt: repositories.githubUpdatedAt,
+					})
+					.from(agentSkillFiles)
+					.innerJoin(repositories, eq(agentSkillFiles.repoId, repositories.id))
+					.leftJoin(
+						agentSkillSubcategories,
+						eq(agentSkillFiles.subcategoryId, agentSkillSubcategories.id),
+					)
+					.leftJoin(
+						agentSkillCategories,
+						eq(agentSkillFiles.categoryId, agentSkillCategories.id),
+					)
+					.where(agentSkillHomeFilter)
+					.orderBy(desc(repositories.stars), desc(agentSkillFiles.updatedAt))
+					.limit(6),
 
-		db
-			.select({
-				category: agentSkillFiles.category,
-				count: count(),
-			})
-			.from(agentSkillFiles)
-			.where(agentSkillHomeFilter)
-			.groupBy(agentSkillFiles.category)
-			.orderBy(desc(count()))
-			.limit(12),
+				db
+					.select({
+						repoSectionId: repoSections.id,
+						repoId: repositories.id,
+						fullName: repositories.fullName,
+						description: repositories.description,
+						url: repositories.url,
+						homepage: repositories.homepage,
+						stars: repositories.stars,
+						forks: repositories.forks,
+						language: repositories.language,
+						topics: repositories.topics,
+						pushedAt: repositories.pushedAt,
+					})
+					.from(repoSections)
+					.innerJoin(repositories, eq(repoSections.repoId, repositories.id))
+					.where(repoHomeFilter)
+					.orderBy(desc(repoSections.score), desc(repositories.stars))
+					.limit(6),
 
-		db
-			.select({
-				month: sql<Date>`date_trunc('month', coalesce(${repositories.githubCreatedAt}, ${repositories.pushedAt}, ${agentSkillFiles.createdAt}))`,
-				count: count(),
-			})
-			.from(agentSkillFiles)
-			.innerJoin(repositories, eq(agentSkillFiles.repoId, repositories.id))
-			.where(agentSkillHomeFilter)
-			.groupBy(sql`1`),
+				db
+					.select({
+						category: categoryLabelExpr,
+						count: count(),
+					})
+					.from(agentSkillFiles)
+					.leftJoin(
+						agentSkillSubcategories,
+						eq(agentSkillFiles.subcategoryId, agentSkillSubcategories.id),
+					)
+					.leftJoin(
+						agentSkillCategories,
+						eq(agentSkillFiles.categoryId, agentSkillCategories.id),
+					)
+					.where(agentSkillHomeFilter)
+					.groupBy(categoryLabelExpr)
+					.orderBy(desc(count()))
+					.limit(12),
 
-		db
-			.select({
-				month: sql<Date>`date_trunc('month', coalesce(${repositories.githubCreatedAt}, ${repositories.pushedAt}, ${repoSections.createdAt}))`,
-				count: count(),
-			})
-			.from(repoSections)
-			.innerJoin(repositories, eq(repoSections.repoId, repositories.id))
-			.where(repoHomeFilter)
-			.groupBy(sql`1`),
-	]);
+				db
+					.select({
+						month: sql<Date>`date_trunc('month', coalesce(${repositories.githubCreatedAt}, ${repositories.pushedAt}, ${agentSkillFiles.createdAt}))`,
+						count: count(),
+					})
+					.from(agentSkillFiles)
+					.innerJoin(repositories, eq(agentSkillFiles.repoId, repositories.id))
+					.where(agentSkillHomeFilter)
+					.groupBy(sql`1`),
 
-	const sourceRepositoryIds = new Set([
-		...agentSkillRepoRows.map((row) => row.repoId),
-		...repoSourceRows.map((row) => row.repoId),
-	]);
-	const readmePreviewByRepoId = new Map<
-		string,
-		{ readmePreview: string | null; readmeUrl: string | null }
-	>();
+				db
+					.select({
+						month: sql<Date>`date_trunc('month', coalesce(${repositories.githubCreatedAt}, ${repositories.pushedAt}, ${repoSections.createdAt}))`,
+						count: count(),
+					})
+					.from(repoSections)
+					.innerJoin(repositories, eq(repoSections.repoId, repositories.id))
+					.where(repoHomeFilter)
+					.groupBy(sql`1`),
+			]);
 
-	await loadReadmePreviews({
-		repos: featured3dRepoRows,
-		readmePreviewByRepoId,
-	});
+			const sourceRepositoryIds = new Set([
+				...agentSkillRepoRows.map((row) => row.repoId),
+				...repoSourceRows.map((row) => row.repoId),
+			]);
+			const readmePreviewByRepoId = new Map<
+				string,
+				{ readmePreview: string | null; readmeUrl: string | null }
+			>();
 
-	return {
-		stats: {
-			approved3dRepos: toNumber(repoCountRows[0]?.count),
-			approvedAgentSkills: toNumber(agentSkillCountRows[0]?.count),
-			sourceRepositories: sourceRepositoryIds.size,
-			categories: toNumber(categoryStatsRows[0]?.count),
-		},
-		featuredAgentSkills: featuredAgentSkillRows.map((item) => ({
-			id: item.id,
-			skillName: item.skillName,
-			slug: item.slug,
-			category: item.category,
-			filePath: item.filePath,
-			fileUrl: item.fileUrl,
-			description: item.description,
-			status: item.status,
-			confidence: item.confidence,
-			repoFullName: item.repoFullName,
-			repoUrl: item.repoUrl,
-			repoStars: item.repoStars,
-			repoForks: item.repoForks,
-			repoUpdatedAt: toIsoDate(item.repoUpdatedAt),
-			installCommand: getPublicAgentSkillInstallCommand({
-				filePath: item.filePath,
-				metadata: item.metadata,
-				repoFullName: item.repoFullName,
-			}),
-		})),
-		featured3dRepos: featured3dRepoRows.map((item) => {
-			const readme = readmePreviewByRepoId.get(item.repoId);
+			await loadReadmePreviews({
+				repos: featured3dRepoRows,
+				readmePreviewByRepoId,
+			});
 
 			return {
-				repoSectionId: item.repoSectionId,
-				repoId: item.repoId,
-				fullName: item.fullName,
-				description: item.description,
-				url: item.url,
-				homepage: item.homepage,
-				stars: item.stars,
-				forks: item.forks,
-				language: item.language,
-				topics: item.topics ?? [],
-				pushedAt: toIsoDate(item.pushedAt),
-				readmePreview: readme?.readmePreview ?? null,
-				readmeUrl: readme?.readmeUrl ?? null,
+				stats: {
+					approved3dRepos: toNumber(repoCountRows[0]?.count),
+					approvedAgentSkills: toNumber(agentSkillCountRows[0]?.count),
+					sourceRepositories: sourceRepositoryIds.size,
+					categories: toNumber(categoryStatsRows[0]?.count),
+				},
+				featuredAgentSkills: featuredAgentSkillRows.map((item) => ({
+					id: item.id,
+					skillName: item.skillName,
+					slug: item.slug,
+					category: item.category,
+					filePath: item.filePath,
+					fileUrl: item.fileUrl,
+					description: item.description,
+					status: item.status,
+					confidence: item.confidence,
+					repoFullName: item.repoFullName,
+					repoUrl: item.repoUrl,
+					repoStars: item.repoStars,
+					repoForks: item.repoForks,
+					repoUpdatedAt: toIsoDate(item.repoUpdatedAt),
+					installCommand: getPublicAgentSkillInstallCommand({
+						filePath: item.filePath,
+						metadata: item.metadata,
+						repoFullName: item.repoFullName,
+					}),
+				})),
+				featured3dRepos: featured3dRepoRows.map((item) => {
+					const readme = readmePreviewByRepoId.get(item.repoId);
+
+					return {
+						repoSectionId: item.repoSectionId,
+						repoId: item.repoId,
+						fullName: item.fullName,
+						description: item.description,
+						url: item.url,
+						homepage: item.homepage,
+						stars: item.stars,
+						forks: item.forks,
+						language: item.language,
+						topics: item.topics ?? [],
+						pushedAt: toIsoDate(item.pushedAt),
+						readmePreview: readme?.readmePreview ?? null,
+						readmeUrl: readme?.readmeUrl ?? null,
+					};
+				}),
+				agentSkillCategories: agentSkillCategoryRows.map((row) => ({
+					category: row.category,
+					count: toNumber(row.count),
+				})),
+				timeline: buildTimeline(
+					agentSkillDatesRows.map((r) => ({
+						month: r.month,
+						count: toNumber(r.count),
+					})),
+					repo3dDatesRows.map((r) => ({
+						month: r.month,
+						count: toNumber(r.count),
+					})),
+				),
 			};
+		},
+		() => ({
+			stats: {
+				approved3dRepos: 0,
+				approvedAgentSkills: 0,
+				sourceRepositories: 0,
+				categories: 0,
+			},
+			featuredAgentSkills: [],
+			featured3dRepos: [],
+			agentSkillCategories: [],
+			timeline: [],
 		}),
-		agentSkillCategories: agentSkillCategoryRows.map((row) => ({
-			category: row.category,
-			count: toNumber(row.count),
-		})),
-		timeline: buildTimeline(
-			agentSkillDatesRows.map((r) => ({
-				month: r.month,
-				count: toNumber(r.count),
-			})),
-			repo3dDatesRows.map((r) => ({
-				month: r.month,
-				count: toNumber(r.count),
-			})),
-		),
-	};
+	);
 });
 
 function buildTimeline(

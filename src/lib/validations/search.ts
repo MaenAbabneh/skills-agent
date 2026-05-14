@@ -4,7 +4,7 @@ export const skillsSearchSchema = z.object({
 	q: z.string().default("").catch(""),
 	category: z.string().default("all").catch("all"),
 	sort: z
-		.enum(["newest", "oldest", "upvotes-desc", "likes-desc"])
+		.enum(["newest", "oldest", "stars", "name"])
 		.default("newest")
 		.catch("newest"),
 });

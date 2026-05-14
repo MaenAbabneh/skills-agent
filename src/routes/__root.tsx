@@ -30,6 +30,31 @@ export const Route = createRootRoute({
 		],
 	}),
 	shellComponent: RootDocument,
+	errorComponent: ({ error }) => (
+		<div className="flex min-h-screen items-center justify-center bg-background px-4">
+			<div className="w-full max-w-3xl rounded-lg border border-border bg-card p-6 shadow-lg">
+				<h1 className="text-xl font-semibold">Application Error</h1>
+				<p className="mt-2 text-sm text-muted-foreground">
+					An unexpected error occurred while loading this route.
+				</p>
+				<pre className="mt-4 overflow-x-auto rounded-md bg-muted p-4 font-mono text-xs text-foreground">
+					{process.env.NODE_ENV === "production"
+						? "An unexpected error occurred."
+						: error instanceof Error
+							? error.message
+							: String(error)}
+				</pre>
+				<div className="mt-4">
+					<a
+						href="/"
+						className="inline-flex rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
+					>
+						Go Home
+					</a>
+				</div>
+			</div>
+		</div>
+	),
 	notFoundComponent: () => (
 		<div className="flex items-center justify-center min-h-screen">
 			<div className="text-center">
