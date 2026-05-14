@@ -7,6 +7,7 @@ import {
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { user } from "./auth-schema";
 import { repoSections } from "./repo-sections.schema";
 
 /**
@@ -20,7 +21,9 @@ export const collections = pgTable(
 	{
 		id: uuid("id").defaultRandom().primaryKey(),
 
-		userId: text("user_id").notNull(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
 
 		title: text("title").notNull(),
 		description: text("description"),

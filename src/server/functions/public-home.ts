@@ -1,15 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import {
-	and,
-	count,
-	desc,
-	eq,
-	inArray,
-	isNull,
-	ne,
-	or,
-	sql,
-} from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "@/server/db";
 import {
@@ -115,27 +105,16 @@ export const getPublicHomeData = createServerFn({
 	return withSafePublicQuery(
 		"getPublicHomeData",
 		async () => {
-			// TODO before public launch:
-			// Restore public-safe filters:
-			// - agent_skill_files.status = "approved"
-			// - repo_sections.status = "approved"
 			const agentSkillHomeFilter = and(
 				eq(agentSkillFiles.section, "agent-skills"),
 				eq(agentSkillFiles.isAccepted, true),
-				or(
-					isNull(agentSkillFiles.status),
-					ne(agentSkillFiles.status, "hidden"),
-				),
+				eq(agentSkillFiles.status, "approved"),
 			);
 
-			// TODO before public launch:
-			// Restore public-safe filters:
-			// - agent_skill_files.status = "approved"
-			// - repo_sections.status = "approved"
 			const repoHomeFilter = and(
 				eq(repoSections.section, "3d-motion"),
 				eq(repoSections.isAccepted, true),
-				or(isNull(repoSections.status), ne(repoSections.status, "hidden")),
+				eq(repoSections.status, "approved"),
 			);
 
 			const categoryLabelExpr = sql<string>`coalesce(${agentSkillSubcategories.name}, ${agentSkillCategories.name}, ${agentSkillFiles.category})`;

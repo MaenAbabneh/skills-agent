@@ -63,8 +63,6 @@ export const repositoryReadmes = pgTable(
 			table.repoId,
 		),
 
-		repoIdIdx: index("repository_readmes_repo_id_idx").on(table.repoId),
-
 		contentFetchedAtIdx: index("repository_readmes_content_fetched_at_idx").on(
 			table.contentFetchedAt,
 		),

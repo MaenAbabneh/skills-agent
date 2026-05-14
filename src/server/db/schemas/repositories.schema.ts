@@ -93,11 +93,6 @@ export const repositories = pgTable(
 			table.name,
 		),
 
-		ownerNameIdx: index("repositories_owner_name_idx").on(
-			table.owner,
-			table.name,
-		),
-
 		starsIdx: index("repositories_stars_idx").on(table.stars),
 
 		githubCreatedAtIdx: index("repositories_github_created_at_idx").on(

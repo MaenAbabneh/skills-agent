@@ -66,7 +66,7 @@ export const agentSkillFiles = pgTable(
 		userInvocable: boolean("user_invocable"),
 
 		status: text("status").notNull().default("pending"),
-		isAccepted: boolean("is_accepted").notNull().default(true),
+		isAccepted: boolean("is_accepted").notNull().default(false),
 
 		// Detail page content fields
 		content: text("content"),

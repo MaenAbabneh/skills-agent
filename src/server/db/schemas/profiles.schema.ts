@@ -6,6 +6,7 @@ import {
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { user } from "./auth-schema";
 import { userRoleEnum } from "./enums.schema";
 
 /**
@@ -16,7 +17,9 @@ export const profiles = pgTable(
 	{
 		id: uuid("id").defaultRandom().primaryKey(),
 
-		userId: text("user_id").notNull(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
 
 		username: text("username"),
 		avatarUrl: text("avatar_url"),

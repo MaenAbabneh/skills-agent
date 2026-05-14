@@ -6,8 +6,6 @@ import {
 	desc,
 	eq,
 	ilike,
-	isNull,
-	ne,
 	or,
 	type SQL,
 	sql,
@@ -84,12 +82,10 @@ function toIsoDate(value: Date | string | null) {
 }
 
 function buildPublicAgentSkillsBaseWhere() {
-	// TODO before public launch:
-	// Require agent_skill_files.status = "approved".
 	return and(
 		eq(agentSkillFiles.section, "agent-skills"),
 		eq(agentSkillFiles.isAccepted, true),
-		or(isNull(agentSkillFiles.status), ne(agentSkillFiles.status, "hidden")),
+		eq(agentSkillFiles.status, "approved"),
 	);
 }
 
@@ -107,14 +103,21 @@ function buildPublicAgentSkillsWhere({
 	const cleanQuery = q?.trim();
 	const cleanCategory = category?.trim();
 	const conditions: SQL[] = [buildPublicAgentSkillsBaseWhere() as SQL];
-	const categoryLabelExpr = getCategoryLabelExpr();
 
 	if (cleanCategory && cleanCategory !== "all") {
-		conditions.push(sql`${categoryLabelExpr} = ${cleanCategory}`);
+		const categoryFilter = or(
+			eq(agentSkillSubcategories.slug, cleanCategory),
+			eq(agentSkillCategories.slug, cleanCategory),
+		);
+
+		if (categoryFilter) {
+			conditions.push(categoryFilter);
+		}
 	}
 
 	if (cleanQuery) {
 		const pattern = `%${cleanQuery}%`;
+		const categoryLabelExpr = getCategoryLabelExpr();
 		const searchCondition = or(
 			ilike(agentSkillFiles.skillName, pattern),
 			ilike(agentSkillFiles.description, pattern),

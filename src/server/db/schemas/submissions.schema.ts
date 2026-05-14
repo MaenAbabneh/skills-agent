@@ -11,6 +11,7 @@ import {
 	agentSkillCategories,
 	agentSkillSubcategories,
 } from "./agent-skill-taxonomy.schema";
+import { user } from "./auth-schema";
 import {
 	repoSectionEnum,
 	submissionStatusEnum,
@@ -28,7 +29,9 @@ export const submissions = pgTable(
 	{
 		id: uuid("id").defaultRandom().primaryKey(),
 
-		userId: text("user_id").notNull(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
 
 		// Submission type: repo or skill_file
 		submissionType: submissionTypeEnum("submission_type").notNull(),
@@ -86,6 +89,7 @@ export const submissions = pgTable(
 			.notNull(),
 	},
 	(table) => ({
+		// githubUrl must be normalized before insert.
 		submissionUrlTypeUnique: uniqueIndex(
 			"submissions_github_section_type_unique",
 		).on(table.githubUrl, table.suggestedSection, table.submissionType),

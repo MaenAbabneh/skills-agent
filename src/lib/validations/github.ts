@@ -50,6 +50,83 @@ export const GitHubSearchResponseSchema = z.object({
 	items: z.array(GitHubRepoSchema),
 });
 
+function assertGithubHost(url: URL) {
+	if (url.hostname !== "github.com") {
+		throw new Error("Must be a github.com URL");
+	}
+}
+
+function getPathSegments(pathname: string) {
+	return pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+}
+
+export function normalizeGitHubRepoUrl(value: string) {
+	const url = new URL(value);
+	assertGithubHost(url);
+
+	const segments = getPathSegments(url.pathname);
+
+	if (segments.length !== 2) {
+		throw new Error("Invalid GitHub repo URL format");
+	}
+
+	const [owner, rawRepo] = segments;
+	const repo = rawRepo.replace(/\.git$/i, "");
+
+	if (!owner || !repo) {
+		throw new Error("Invalid GitHub repo URL format");
+	}
+
+	return `https://github.com/${owner.toLowerCase()}/${repo.toLowerCase()}`;
+}
+
+function isValidGitHubRepoUrl(value: string) {
+	try {
+		normalizeGitHubRepoUrl(value);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+export function normalizeGitHubSkillFileUrl(value: string) {
+	const url = new URL(value);
+	assertGithubHost(url);
+
+	const segments = getPathSegments(url.pathname);
+
+	if (segments.length < 5 || segments[2] !== "blob") {
+		throw new Error("Invalid GitHub skill file URL format");
+	}
+
+	if (segments.some((segment) => segment === "." || segment === "..")) {
+		throw new Error("Invalid GitHub skill file URL format");
+	}
+
+	const [owner, rawRepo, , branch, ...fileSegments] = segments;
+	const repo = rawRepo.replace(/\.git$/i, "");
+	const filePath = fileSegments.join("/");
+
+	if (!owner || !repo || !branch || !filePath) {
+		throw new Error("Invalid GitHub skill file URL format");
+	}
+
+	if (!/skill\.md$/i.test(filePath)) {
+		throw new Error("Must end with SKILL.md or skill.md");
+	}
+
+	return `https://github.com/${owner.toLowerCase()}/${repo.toLowerCase()}/blob/${branch}/${filePath}`;
+}
+
+function isValidGitHubSkillFileUrl(value: string) {
+	try {
+		normalizeGitHubSkillFileUrl(value);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 /**
  * GitHub repo URL validation schema.
  * Accepts URLs like: https://github.com/owner/repo
@@ -57,9 +134,8 @@ export const GitHubSearchResponseSchema = z.object({
 export const gitHubRepoUrlSchema = z
 	.string()
 	.url()
-	.refine((url) => url.includes("github.com"), "Must be a github.com URL")
-	.transform((url) => url.replace(/\.git$/, ""))
-	.transform((url) => url.replace(/\/$/, ""));
+	.refine(isValidGitHubRepoUrl, "Must be a github.com URL")
+	.transform((url) => normalizeGitHubRepoUrl(url));
 
 /**
  * Parsed GitHub repo URL.
@@ -77,11 +153,11 @@ export const parsedGitHubRepoSchema = z.object({
 export const gitHubSkillFileUrlSchema = z
 	.string()
 	.url()
-	.refine((url) => url.includes("github.com"), "Must be a github.com URL")
 	.refine(
-		(url) => /\/blob\/[\w\-/.]+\/.*[Ss][Kk][Ii][Ll][Ll]\.md$/.test(url),
-		"Must end with SKILL.md or skill.md",
-	);
+		isValidGitHubSkillFileUrl,
+		"Must be a github.com blob URL ending in SKILL.md",
+	)
+	.transform((url) => normalizeGitHubSkillFileUrl(url));
 
 /**
  * Parsed GitHub skill file URL.
@@ -101,16 +177,17 @@ export const parsedGitHubSkillFileSchema = z.object({
 export function parseGitHubRepoUrl(
 	value: string,
 ): z.infer<typeof parsedGitHubRepoSchema> {
-	const validated = gitHubRepoUrlSchema.parse(value);
-	const match = validated.match(/github\.com\/([^/]+)\/([^/]+)/);
+	const validated = normalizeGitHubRepoUrl(value);
+	const pathSegments = new URL(validated).pathname.split("/").filter(Boolean);
+	const [owner, repo] = pathSegments;
 
-	if (!match || !match[1] || !match[2]) {
+	if (!owner || !repo) {
 		throw new Error("Invalid GitHub repo URL format");
 	}
 
 	return {
-		owner: match[1],
-		repo: match[2].replace(/\.git$/, ""),
+		owner,
+		repo,
 		url: validated,
 	};
 }
@@ -122,23 +199,21 @@ export function parseGitHubRepoUrl(
 export function parseGitHubSkillFileUrl(
 	value: string,
 ): z.infer<typeof parsedGitHubSkillFileSchema> {
-	gitHubSkillFileUrlSchema.parse(value);
+	const validated = normalizeGitHubSkillFileUrl(value);
+	const pathSegments = new URL(validated).pathname.split("/").filter(Boolean);
+	const [owner, repo, , branch, ...fileSegments] = pathSegments;
+	const filePath = fileSegments.join("/");
 
-	// Extract owner/repo/branch/path from URL
-	const match = value.match(
-		/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)/,
-	);
-
-	if (!match || !match[1] || !match[2] || !match[3] || !match[4]) {
+	if (!owner || !repo || !branch || !filePath) {
 		throw new Error("Invalid GitHub skill file URL format");
 	}
 
 	return {
-		owner: match[1],
-		repo: match[2],
-		branch: match[3],
-		filePath: match[4],
-		url: value,
+		owner,
+		repo,
+		branch,
+		filePath,
+		url: validated,
 	};
 }
 

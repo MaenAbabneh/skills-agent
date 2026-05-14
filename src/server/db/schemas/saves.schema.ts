@@ -7,6 +7,7 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import { agentSkillFiles } from "./agent-skill-files.schema";
+import { user } from "./auth-schema";
 import { repoSections } from "./repo-sections.schema";
 
 /**
@@ -20,7 +21,9 @@ export const agentSkillSaves = pgTable(
 	{
 		id: uuid("id").defaultRandom().primaryKey(),
 
-		userId: text("user_id").notNull(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
 
 		agentSkillFileId: uuid("agent_skill_file_id")
 			.notNull()
@@ -59,7 +62,9 @@ export const repoSaves = pgTable(
 	{
 		id: uuid("id").defaultRandom().primaryKey(),
 
-		userId: text("user_id").notNull(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
 
 		repoSectionId: uuid("repo_section_id")
 			.notNull()
