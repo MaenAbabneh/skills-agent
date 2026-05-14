@@ -6,7 +6,6 @@ import {
 	Database,
 	Eye,
 	Github,
-	RefreshCcw,
 	Search,
 	ShieldAlert,
 } from "lucide-react";
@@ -20,7 +19,6 @@ import {
 	formatAdminDate,
 } from "#/components/admin/common";
 import { AdminSectionSelector } from "#/components/admin/discovery";
-import { useAdminAgentSkillsRevalidation } from "#/components/admin/useAdminAgentSkillsRevalidation";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -108,8 +106,6 @@ export function AdminOverviewPage({
 	const { totals, sections, recentRuns } = dashboard;
 	const hasDashboardData = sections.length > 0 || recentRuns.length > 0;
 	const selectedSectionLabel = SECTION_CONFIGS[selectedSection].label;
-	const { isRevalidatingAgentSkills, revalidateAgentSkills } =
-		useAdminAgentSkillsRevalidation();
 	const selectedSectionHealth = sections.find(
 		(section) => section.section === selectedSection,
 	) ?? {
@@ -139,22 +135,6 @@ export function AdminOverviewPage({
 				description="Monitor repository discovery, review queues, and platform health."
 				actions={
 					<>
-						{selectedSection === "agent-skills" && (
-							<Button
-								type="button"
-								variant="outline"
-								disabled={isRevalidatingAgentSkills}
-								onClick={revalidateAgentSkills}
-							>
-								<RefreshCcw
-									className={`mr-2 h-4 w-4 ${isRevalidatingAgentSkills ? "animate-spin" : ""}`}
-								/>
-								{isRevalidatingAgentSkills
-									? "Revalidating..."
-									: "Revalidate Skills"}
-							</Button>
-						)}
-
 						<Button asChild>
 							<Link
 								to="/admin/repos"

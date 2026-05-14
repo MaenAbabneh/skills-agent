@@ -7,7 +7,7 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 
-import { syncLogs } from "./app-schema";
+import { syncLogs } from "./logs.schema";
 import { sectionSearchQueries } from "./sectionSearchQueries.schema";
 
 export const sectionSearchQueryRuns = pgTable(

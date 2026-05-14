@@ -5,7 +5,8 @@ import {
 	generateAgentSkillInstallCommands,
 } from "#/lib/agent-skills-utils";
 import { db } from "#/server/db";
-import { agentSkillFiles, repositories } from "#/server/db/schemas/app-schema";
+import { agentSkillFiles } from "#/server/db/schemas/agent-skill-files.schema";
+import { repositories } from "#/server/db/schemas/repositories.schema";
 import { fetchAgentSkillFileContent } from "#/server/github/agent-skill-files";
 
 export async function enrichAgentSkillFilesBatch({
