@@ -7,7 +7,7 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
-import { repoSectionEnum } from "./app-schema";
+import { repoSectionEnum } from "./enums.schema";
 
 export const aiUsageStatusEnum = pgEnum("ai_usage_status", [
 	"success",
