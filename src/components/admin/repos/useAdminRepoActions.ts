@@ -2,7 +2,6 @@ import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { useAdminAgentSkillsRevalidation } from "#/components/admin/useAdminAgentSkillsRevalidation";
 import type { SectionId } from "#/lib/sections";
 
 import {
@@ -19,14 +18,6 @@ export function useAdminRepoActions(section: SectionId) {
 	const [updatingAction, setUpdatingAction] = useState<UpdatingAction | null>(
 		null,
 	);
-	const {
-		isRevalidatingAgentSkills,
-		revalidateAgentSkills,
-		isEnrichingAgentSkills,
-		enrichAgentSkills,
-		isRefreshingDerivedMetadata,
-		refreshDerivedMetadata,
-	} = useAdminAgentSkillsRevalidation();
 
 	async function runAction({
 		repoSectionId,
@@ -69,12 +60,6 @@ export function useAdminRepoActions(section: SectionId) {
 	return {
 		updatingRepoId,
 		updatingAction,
-		isRevalidatingAgentSkills,
 		runAction,
-		revalidateAgentSkills,
-		isEnrichingAgentSkills,
-		enrichAgentSkills,
-		isRefreshingDerivedMetadata,
-		refreshDerivedMetadata,
 	};
 }

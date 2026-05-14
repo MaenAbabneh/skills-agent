@@ -6,7 +6,6 @@ import {
 	getAdminReposQuery,
 	updateRepoSectionStatus,
 } from "@/server/admin/admin-repos.query";
-import { revalidateAgentSkillsRepos as revalidateAgentSkillsReposService } from "@/server/repos/agent-skills.revalidate";
 import { SECTION_IDS } from "@/server/sections/sections.config";
 
 const AdminRepoStatusSchema = z.enum([
@@ -31,10 +30,6 @@ const GetAdminReposInputSchema = z.object({
 const RepoSectionActionInputSchema = z.object({
 	section: z.enum(SECTION_IDS),
 	repoSectionId: z.string().min(1),
-});
-
-const RevalidateAgentSkillsReposInputSchema = z.object({
-	limit: z.number().int().min(1).max(100).optional(),
 });
 
 export const getAdminRepos = createServerFn({
@@ -85,37 +80,5 @@ export const hideRepoSection = createServerFn({
 			section: data.section,
 			repoSectionId: data.repoSectionId,
 			status: "hidden",
-		});
-	});
-
-export const revalidateAgentSkillsRepos = createServerFn({
-	method: "POST",
-})
-	.inputValidator(RevalidateAgentSkillsReposInputSchema)
-	.handler(async ({ data }) => {
-		return revalidateAgentSkillsReposService({
-			limit: data.limit,
-		});
-	});
-
-export const enrichRepositoryReadmesAction = createServerFn({
-	method: "POST",
-})
-	.inputValidator(
-		z.object({
-			section: z.literal("3d-motion"),
-			limit: z.number().int().min(1).max(200).default(50),
-			forceRefresh: z.boolean().default(false),
-		}),
-	)
-	.handler(async ({ data }) => {
-		const { enrichRepositoryReadmes } = await import(
-			"@/server/repos/repo-readme-enrichment"
-		);
-
-		return enrichRepositoryReadmes({
-			section: data.section,
-			limit: data.limit,
-			forceRefresh: data.forceRefresh,
 		});
 	});

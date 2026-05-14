@@ -7,7 +7,6 @@ import { AdminReposHeader } from "#/components/admin/repos/AdminReposHeader";
 import { AdminReposPagination } from "#/components/admin/repos/AdminReposPagination";
 import { AdminReposSearchSchema } from "#/components/admin/repos/admin-repos.schema";
 import { useAdminRepoActions } from "#/components/admin/repos/useAdminRepoActions";
-import { useAdminRepoReadmeEnrichment } from "#/components/admin/repos/useAdminRepoReadmeEnrichment";
 import { normalizeSectionId, type SectionId } from "#/lib/sections";
 import { getAgentSkillReviewItems } from "#/server/functions/admin-agent-skills";
 import { getAdminRepos } from "#/server/functions/admin-repos";
@@ -66,25 +65,9 @@ function AdminReposPage() {
 	const loaderData = Route.useLoaderData();
 	const type = loaderData.type;
 	const result = loaderData.result;
-	const {
-		updatingRepoId,
-		updatingAction,
-		isRevalidatingAgentSkills,
-		runAction,
-		revalidateAgentSkills,
-		isEnrichingAgentSkills,
-		enrichAgentSkills,
-		isRefreshingDerivedMetadata,
-		refreshDerivedMetadata,
-	} = useAdminRepoActions(search.section);
-
-	const {
-		isEnrichingMissingReadmes,
-		isRefreshingExistingReadmes,
-		enrichMissingReadmes,
-		refreshExistingReadmes,
-		enrichResult: readmeEnrichResult,
-	} = useAdminRepoReadmeEnrichment();
+	const { updatingRepoId, updatingAction, runAction } = useAdminRepoActions(
+		search.section,
+	);
 
 	function handleSectionChange(section: SectionId) {
 		navigate({
@@ -98,20 +81,7 @@ function AdminReposPage() {
 
 	return (
 		<div className="space-y-6">
-			<AdminReposHeader
-				search={search}
-				isRevalidatingAgentSkills={isRevalidatingAgentSkills}
-				onRevalidateAgentSkills={revalidateAgentSkills}
-				isEnrichingAgentSkills={isEnrichingAgentSkills}
-				onEnrichAgentSkills={enrichAgentSkills}
-				isRefreshingDerivedMetadata={isRefreshingDerivedMetadata}
-				onRefreshDerivedMetadata={refreshDerivedMetadata}
-				isEnrichingMissingReadmes={isEnrichingMissingReadmes}
-				onEnrichMissingReadmes={enrichMissingReadmes}
-				isRefreshingExistingReadmes={isRefreshingExistingReadmes}
-				onRefreshExistingReadmes={refreshExistingReadmes}
-				readmeEnrichResult={readmeEnrichResult}
-			/>
+			<AdminReposHeader search={search} />
 
 			<AdminSectionSelector
 				section={search.section}
