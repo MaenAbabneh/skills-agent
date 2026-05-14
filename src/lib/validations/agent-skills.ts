@@ -26,9 +26,24 @@ export const agentSkillInstallCommandsSchema = z.object({
 export const agentSkillTaxonomyMetadataSchema = z.object({
 	categorySlug: z.string().optional(),
 	subcategorySlug: z.string().optional(),
+	fallbackReason: z.string().optional(),
 	confidence: z.string().optional(),
 	matchedKeywords: z.array(z.string()).optional(),
 	classifierVersion: z.string().optional(),
+});
+
+/**
+ * Agent skill discovery metadata schema.
+ * Stores the discovery provenance for a file row.
+ */
+export const agentSkillDiscoveryMetadataSchema = z.object({
+	section: z.literal("agent-skills").optional(),
+	querySources: z.array(z.string()).optional(),
+	detectedFilePath: z.string().optional(),
+	detectedFileUrl: z.string().url().optional(),
+	detectedFileName: z.string().optional(),
+	detectionConfidence: z.enum(["high", "medium"]).optional(),
+	detectedAt: z.string().optional(),
 });
 
 /**
@@ -64,7 +79,9 @@ export const agentSkillFileMetadataSchema = z.object({
 	extractedDescription: z.string().optional(),
 	extractedTools: z.array(z.string()).optional(),
 	extractError: z.string().optional(),
+	contentFetchError: z.string().optional(),
 	taxonomy: agentSkillTaxonomyMetadataSchema.optional(),
+	discovery: agentSkillDiscoveryMetadataSchema.optional(),
 	installCommands: agentSkillInstallCommandsSchema.optional(),
 });
 
@@ -73,6 +90,9 @@ export type AgentSkillInstallCommands = z.infer<
 >;
 export type AgentSkillTaxonomyMetadata = z.infer<
 	typeof agentSkillTaxonomyMetadataSchema
+>;
+export type AgentSkillDiscoveryMetadata = z.infer<
+	typeof agentSkillDiscoveryMetadataSchema
 >;
 export type ParsedSkillMd = z.infer<typeof parsedSkillMdSchema>;
 export type AgentSkillContent = z.infer<typeof agentSkillContentSchema>;

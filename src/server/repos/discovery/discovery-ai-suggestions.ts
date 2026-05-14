@@ -4,7 +4,7 @@ import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { RepoSection } from "@/lib/validations/repos";
 import { db } from "@/server/db";
-import { aiUsageLogs } from "@/server/db/schemas/aiUsageLogs-schema";
+import { aiUsageLogs } from "@/server/db/schema";
 import type { SectionId } from "@/server/sections/sections.config";
 import type { DiscoveryPlan } from "./discovery.planner";
 import type { TopicMiningResult } from "./discovery-topic-mining.query";

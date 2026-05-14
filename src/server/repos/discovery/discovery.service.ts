@@ -25,6 +25,7 @@ import {
 	getSearchBudget,
 } from "@/server/github/rate-limit";
 import { createAgentSkillDetectionContext } from "@/server/repos/agent-skills-detection";
+import { upsertDetectedAgentSkillFiles } from "@/server/repos/agent-skills-upsert";
 import {
 	createSyncLog,
 	getExistingSectionGithubIds,
@@ -954,13 +955,21 @@ export async function discoverNewReposForSectionService({
 					sourceQueryByKey,
 				}),
 			});
+			const detectedAgentSkillFiles =
+				processed.metadata.kind === "agent-skills"
+					? (processed.metadata.skillFiles ?? [])
+					: [];
+			const shouldAutoApproveAgentSkills =
+				strategy.id === "agent-skills" &&
+				processed.metadata.kind === "agent-skills" &&
+				detectedAgentSkillFiles.length > 0;
 
 			await withDatabaseRetry({
 				label: `save repo ${repo.full_name}`,
 				operation: async () => {
 					const repositoryId = await upsertRepository(repo);
 
-					await upsertRepoSection({
+					const repoSection = await upsertRepoSection({
 						repoId: repositoryId,
 						section: processed.section,
 						repoType: processed.repoType,
@@ -969,7 +978,26 @@ export async function discoverNewReposForSectionService({
 						rejectionReasons: processed.rejectionReasons,
 						isAccepted: processed.isAccepted,
 						metadata: processed.metadata,
+						status: shouldAutoApproveAgentSkills ? "approved" : undefined,
 					});
+
+					if (
+						strategy.id === "agent-skills" &&
+						processed.metadata.kind === "agent-skills" &&
+						detectedAgentSkillFiles.length > 0
+					) {
+						await upsertDetectedAgentSkillFiles({
+							repoId: repositoryId,
+							repoSectionId: repoSection.id,
+							repository: processed.githubRepo,
+							detectedFiles: detectedAgentSkillFiles,
+							querySources: getQuerySourcesForRepo({
+								repoId: repo.id,
+								querySourceKeysByRepoId,
+								sourceQueryByKey,
+							}),
+						});
+					}
 				},
 			});
 

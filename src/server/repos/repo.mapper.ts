@@ -2,6 +2,7 @@ import type { GitHubRepo } from "@/lib/validations/github";
 import type { RepoSectionMetadata } from "@/lib/validations/repo-metadata";
 import type {
 	RepoSection,
+	RepoSectionStatus,
 	RepoType,
 	ScoreBreakdown,
 } from "@/lib/validations/repos";
@@ -69,6 +70,7 @@ export function mapRepoSectionValues({
 	rejectionReasons,
 	isAccepted,
 	metadata,
+	status,
 }: {
 	repoId: string;
 	section: RepoSection;
@@ -78,6 +80,7 @@ export function mapRepoSectionValues({
 	rejectionReasons: string[];
 	isAccepted: boolean;
 	metadata: RepoSectionMetadata;
+	status?: RepoSectionStatus;
 }) {
 	return {
 		repoId,
@@ -91,7 +94,7 @@ export function mapRepoSectionValues({
 		rejectionReasons,
 		isAccepted,
 
-		status: "pending" as const,
+		status: status ?? "pending",
 
 		metadata,
 

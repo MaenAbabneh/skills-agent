@@ -1,13 +1,12 @@
 import { and, count, desc, eq, or, sql } from "drizzle-orm";
-import { parseAgentSkillMarkdown } from "#/lib/agent-skills-parser";
+import { parseAgentSkillMarkdown } from "@/lib/agent-skills-parser";
 import {
 	classifyAgentSkillCategory,
 	generateAgentSkillInstallCommands,
-} from "#/lib/agent-skills-utils";
-import { db } from "#/server/db";
-import { agentSkillFiles } from "#/server/db/schemas/agent-skill-files.schema";
-import { repositories } from "#/server/db/schemas/repositories.schema";
-import { fetchAgentSkillFileContent } from "#/server/github/agent-skill-files";
+} from "@/lib/agent-skills-utils";
+import { db } from "@/server/db";
+import { agentSkillFiles, repositories } from "@/server/db/schema";
+import { fetchAgentSkillFileContent } from "@/server/github/agent-skill-files";
 
 export async function enrichAgentSkillFilesBatch({
 	limit = 20,
@@ -67,17 +66,19 @@ export async function enrichAgentSkillFilesBatch({
 
 					if (!fetchResult.ok || !fetchResult.content) {
 						// Save install commands even when content fetch fails.
+						const metadata = {
+							...existingMetadata,
+							installCommands,
+							skillFolderPath: installCommands.skillFolderPath,
+							rawFileUrl: installCommands.rawFileUrl,
+							derivedMetadataRefreshedAt: new Date().toISOString(),
+							derivedMetadataVersion: 1,
+						} satisfies Record<string, unknown>;
+
 						await db
 							.update(agentSkillFiles)
 							.set({
-								metadata: {
-									...existingMetadata,
-									installCommands,
-									skillFolderPath: installCommands.skillFolderPath,
-									rawFileUrl: installCommands.rawFileUrl,
-									derivedMetadataRefreshedAt: new Date().toISOString(),
-									derivedMetadataVersion: 1,
-								} as any,
+								metadata,
 								updatedAt: new Date(),
 							})
 							.where(eq(agentSkillFiles.id, skill.id));
@@ -98,6 +99,14 @@ export async function enrichAgentSkillFilesBatch({
 						skillContent: fetchResult.content,
 						extractedDescription: parsed.description,
 					});
+					const metadata = {
+						...existingMetadata,
+						installCommands,
+						skillFolderPath: installCommands.skillFolderPath,
+						rawFileUrl: installCommands.rawFileUrl,
+						derivedMetadataRefreshedAt: new Date().toISOString(),
+						derivedMetadataVersion: 1,
+					} satisfies Record<string, unknown>;
 
 					await db
 						.update(agentSkillFiles)
@@ -107,14 +116,7 @@ export async function enrichAgentSkillFilesBatch({
 							category: newCategory,
 							allowedTools: parsed.allowedTools || null,
 							userInvocable: parsed.userInvocable ?? null,
-							metadata: {
-								...existingMetadata,
-								installCommands,
-								skillFolderPath: installCommands.skillFolderPath,
-								rawFileUrl: installCommands.rawFileUrl,
-								derivedMetadataRefreshedAt: new Date().toISOString(),
-								derivedMetadataVersion: 1,
-							} as any,
+							metadata,
 							updatedAt: new Date(),
 						})
 						.where(eq(agentSkillFiles.id, skill.id));
@@ -197,18 +199,19 @@ export async function refreshAgentSkillDerivedMetadata({
 
 			const existingMetadata =
 				(skill.metadata as Record<string, unknown> | null) ?? {};
+			const metadata = {
+				...existingMetadata,
+				skillFolderPath,
+				rawFileUrl,
+				installCommands,
+				derivedMetadataRefreshedAt: new Date().toISOString(),
+				derivedMetadataVersion: 1,
+			} satisfies Record<string, unknown>;
 
 			await db
 				.update(agentSkillFiles)
 				.set({
-					metadata: {
-						...existingMetadata,
-						skillFolderPath,
-						rawFileUrl,
-						installCommands,
-						derivedMetadataRefreshedAt: new Date().toISOString(),
-						derivedMetadataVersion: 1,
-					} as any,
+					metadata,
 					updatedAt: new Date(),
 				})
 				.where(eq(agentSkillFiles.id, skill.id));

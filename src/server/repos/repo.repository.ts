@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type { GitHubRepo } from "@/lib/validations/github";
 import type { RepoSectionMetadata } from "@/lib/validations/repo-metadata";
 import type {
@@ -46,6 +46,7 @@ export async function upsertRepoSection({
 	rejectionReasons,
 	isAccepted,
 	metadata,
+	status,
 }: {
 	repoId: string;
 	section: RepoSection;
@@ -55,6 +56,7 @@ export async function upsertRepoSection({
 	rejectionReasons: string[];
 	isAccepted: boolean;
 	metadata: RepoSectionMetadata;
+	status?: RepoSectionStatus;
 }) {
 	const values = mapRepoSectionValues({
 		repoId,
@@ -65,17 +67,13 @@ export async function upsertRepoSection({
 		rejectionReasons,
 		isAccepted,
 		metadata,
+		status,
 	});
 
 	/**
 	 * Important:
-	 * On conflict, do NOT update status.
-	 *
-	 * status is admin decision:
-	 * - approved stays approved
-	 * - rejected stays rejected
-	 * - hidden stays hidden
-	 * - pending stays pending
+	 * On conflict, only auto-promote approved agent-skill rows.
+	 * Hidden/rejected admin decisions must be preserved.
 	 */
 	const inserted = await db
 		.insert(repoSections)
@@ -89,6 +87,11 @@ export async function upsertRepoSection({
 				rejectionReasons,
 				isAccepted,
 				metadata,
+				...(status === "approved"
+					? {
+							status: sql`case when ${repoSections.status} in ('hidden', 'rejected') then ${repoSections.status} else 'approved' end`,
+						}
+					: {}),
 				updatedAt: new Date(),
 			},
 		})
